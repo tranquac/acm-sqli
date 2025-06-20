@@ -1,0 +1,32 @@
+{
+  "threads": 10,
+  "level": 5,
+  "risk": 1,
+  "time_based": false,
+  "url": [
+    {
+      "url": "https://demo.testfire.net/?mode=FUZZ",
+      "http_method": "GET",
+      "form_params": "",
+      "body_params": ""
+    },
+    {
+      "url": "https://demo.testfire.net/util/serverStatusCheckService.jsp?HostName=FUZZ",
+      "http_method": "GET",
+      "form_params": "",
+      "body_params": ""
+    },
+    {
+      "url": "https://demo.testfire.net/doLogin",
+      "http_method": "POST",
+      "form_params": "uid,passw,btnSubmit",
+      "body_params": ""
+    },
+    {
+      "url": "https://demo.testfire.net/doSubscribe",
+      "http_method": "POST",
+      "form_params": "txtEmail,btnSubmit",
+      "body_params": ""
+    }
+  ]
+}
