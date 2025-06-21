@@ -16,11 +16,11 @@ import (
 const sqlmapPath = "./sqlmap/sqlmap.py"
 
 type ScanBatchInput struct {
-	Threads    int         `json:"threads"`
-	Level      int         `json:"level"`
-	Risk       int         `json:"risk"`
-	TimeBased  bool        `json:"time_based"`
-	URL        []ScanInput `json:"url"`
+	Threads   int         `json:"threads"`
+	Level     int         `json:"level"`
+	Risk      int         `json:"risk"`
+	TimeBased bool        `json:"time_based"`
+	URL       []ScanInput `json:"url"`
 }
 
 type ScanInput struct {
@@ -42,12 +42,11 @@ type ScanResult struct {
 var (
 	scanResults = make(map[string]*ScanResult)
 	mu          sync.RWMutex
-	scanCancel  = make(map[string]chan struct{})
+	scanCancel = make(map[string]chan struct{})
 )
 
 func main() {
 	r := gin.Default()
-
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})
 	})
@@ -177,6 +176,7 @@ func processInputWithCancel(input ScanInput, cancelChan chan struct{}, level, ri
 
 	extraArgs := []string{
 		"--batch",
+		"--stop",
 		fmt.Sprintf("--level=%d", level),
 		fmt.Sprintf("--risk=%d", risk),
 		fmt.Sprintf("--threads=%d", threads),
@@ -211,7 +211,6 @@ func processInputWithCancel(input ScanInput, cancelChan chan struct{}, level, ri
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &out
-
 	done := make(chan struct{})
 	go func() {
 		fmt.Println("[SQLMAP CMD]", strings.Join(cmd.Args, " "))
@@ -219,7 +218,6 @@ func processInputWithCancel(input ScanInput, cancelChan chan struct{}, level, ri
 		fmt.Println(out.String())
 		done <- struct{}{}
 	}()
-
 
 	select {
 	case <-cancelChan:
@@ -270,8 +268,9 @@ func buildJSONData(params string) string {
 func extractPayload(output string) string {
 	lines := strings.Split(output, "\n")
 	for _, line := range lines {
-		if strings.Contains(line, "[PAYLOAD]") {
-			return strings.TrimSpace(strings.TrimPrefix(line, "[PAYLOAD]"))
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "Payload:") {
+			return strings.TrimSpace(strings.TrimPrefix(line, "Payload:"))
 		}
 	}
 	return ""
